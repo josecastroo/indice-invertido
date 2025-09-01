@@ -15,11 +15,9 @@ namespace BuscadorIndiceInvertido.ContoladorView
         private static MotorBusqueda motor;
         private static bool sistemaInicializado = false;
 
-
-
         public static bool Iniciar()
         {
-            string rutaDocumentos = @"C:\Users\bryan\Downloads\Documentos\Documentos";
+            string rutaDocumentos = @"../Documentos";
 
             try
             {

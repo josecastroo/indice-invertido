@@ -109,11 +109,6 @@ namespace BuscadorIndiceInvertido.Index
             return resultadosLimitados;
         }
 
-        private string DecodificarFileName(string fileName)
-        {
-            byte[] data = Convert.FromBase64String(fileName);
-            return System.Text.Encoding.UTF8.GetString(data);
-        }
         private string DecodificarBase64(string textoBase64)
         {
             // Tabla de conversión rápida: cada carácter ASCII -> valor en Base64
