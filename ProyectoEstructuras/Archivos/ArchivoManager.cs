@@ -84,7 +84,7 @@ namespace BuscadorIndiceInvertido.Persistencia
                         foreach (var (doc, freq) in postings)
                         {
                             int docIdRef = BuscarIdDocumento(documentosUnicos, doc.FileName);
-                            writer.Write(docIdRef);  // solo el ID, no todo el documento
+                            writer.Write(docIdRef);  // solo el ID
                             writer.Write(freq);
                         }
                     }

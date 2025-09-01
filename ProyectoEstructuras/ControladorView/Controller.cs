@@ -19,7 +19,8 @@ namespace BuscadorIndiceInvertido.ContoladorView
 
         public static bool Iniciar()
         {
-            string rutaDocumentos = @"C:\Users\RuizM\Desktop\Documentos";
+            string rutaDocumentos = @"C:\Users\castr\Desktop\Documentos";
+
             try
             {
                 ProcesadorDoc processor = new ProcesadorDoc();

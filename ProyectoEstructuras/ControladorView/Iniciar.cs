@@ -7,9 +7,9 @@ namespace BuscadorIndiceInvertido.Interfaz
 {
     public class IniciarSistema
     {
-        // para los archivos
         private static ArchivoManager archivoManager = new ArchivoManager();
         private static IndiceInvertido indiceGuardado = null;
+
         public static void IniciarMenu()
         {
             MostrarBienvenida();
@@ -23,7 +23,8 @@ namespace BuscadorIndiceInvertido.Interfaz
                 Console.WriteLine("2. Guardar en archivos");
                 Console.WriteLine("3. Cargar de archivos");
                 Console.WriteLine("0. Salir");
-                Console.WriteLine("Ingrese la opción que desea realizar: ");
+                Console.WriteLine();
+                Console.Write("Ingrese la opción que desea realizar: ");
                 string input = Console.ReadLine();
 
                 if (!int.TryParse(input, out opcion))
@@ -114,7 +115,6 @@ namespace BuscadorIndiceInvertido.Interfaz
             Console.WriteLine("╔══════════════════════════════════════════════════════╗");
             Console.WriteLine("║        SISTEMA DE BÚSQUEDA POR ÍNDICE INVERTIDO      ║");
             Console.WriteLine("╚══════════════════════════════════════════════════════╝");
-            Console.WriteLine();
         }
 
         private static void EsperarTecla()
@@ -125,8 +125,8 @@ namespace BuscadorIndiceInvertido.Interfaz
         }
         private static void GuardarEnArchivos()
         {
-            // Verificar que hay un índice construido en Controller
-            if (!Controller.TieneIndiceDisponible()) // Necesitarías agregar este método al Controller
+            // verificar si hay un índice construido en Controller
+            if (!Controller.TieneIndiceDisponible())
             {
                 Console.WriteLine("No hay índice construido para guardar.");
                 Console.WriteLine("Primero debe inicializar la búsqueda (opción 1).");
@@ -136,13 +136,13 @@ namespace BuscadorIndiceInvertido.Interfaz
 
             Console.Write("Guardando índice en archivo... ");
 
-            if (archivoManager.GuardarIndice(Controller.ObtenerIndice())) // Necesitarías agregar este método al Controller
+            if (archivoManager.GuardarIndice(Controller.ObtenerIndice()))
             {
-                Console.WriteLine("✓ Índice guardado exitosamente.");
+                Console.WriteLine("Índice guardado exitosamente.");
             }
             else
             {
-                Console.WriteLine("✗ Error al guardar el índice.");
+                Console.WriteLine("Error al guardar el índice.");
             }
 
             EsperarTecla();
@@ -158,8 +158,8 @@ namespace BuscadorIndiceInvertido.Interfaz
             {
                 Console.WriteLine("✓ Índice cargado exitosamente.");
 
-                // Configurar el Controller con el índice cargado
-                if (Controller.ConfigurarConIndiceCargado(indiceGuardado)) // Necesitarías agregar este método al Controller
+                // configurar el Controller con el índice cargado
+                if (Controller.ConfigurarConIndiceCargado(indiceGuardado))
                 {
                     Console.WriteLine("Sistema listo para realizar búsquedas con el índice cargado.");
                     Console.WriteLine();
@@ -172,7 +172,7 @@ namespace BuscadorIndiceInvertido.Interfaz
             }
             else
             {
-                Console.WriteLine("✗ Error al cargar el índice o archivo no encontrado.");
+                Console.WriteLine("Error al cargar el índice o archivo no encontrado.");
             }
 
             EsperarTecla();

@@ -1,4 +1,6 @@
-﻿using BuscadorIndiceInvertido.Base;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
+using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Ordenamientos;
 using BuscadorIndiceInvertido.ProcesamientoDatos;
 using BuscadorIndiceInvertido.Strategies;
@@ -84,7 +86,7 @@ namespace BuscadorIndiceInvertido.Index
                 Console.WriteLine();
                 posicion++;
             }
-        }
+        } 
 
         private DoubleList<(Doc doc, double score)> LimitarResultados(DoubleList<(Doc doc, double score)> resultados, int topN)
         {
@@ -102,6 +104,12 @@ namespace BuscadorIndiceInvertido.Index
             }
 
             return resultadosLimitados;
+        }
+
+        private string DecodificarFileName(string fileName)
+        {
+            byte[] data = Convert.FromBase64String(fileName);
+            return System.Text.Encoding.UTF8.GetString(data);
         }
     }
 }
