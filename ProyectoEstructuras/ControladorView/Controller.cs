@@ -19,7 +19,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
 
         public static bool Iniciar()
         {
-            string rutaDocumentos = @"C:\Users\castr\Desktop\Documentos";
+            string rutaDocumentos = @"C:\Users\bryan\Downloads\Documentos\Documentos";
 
             try
             {

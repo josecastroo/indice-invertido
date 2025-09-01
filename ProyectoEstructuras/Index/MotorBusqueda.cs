@@ -81,7 +81,10 @@ namespace BuscadorIndiceInvertido.Index
             int posicion = 1;
             foreach (var (doc, score) in resultados)
             {
-                Console.WriteLine($"{posicion}. {doc.FileName}");
+                string base64Name = doc.FileName.Replace(".txt", "");
+                string url = DecodificarBase64(base64Name);
+
+                Console.WriteLine($"{posicion}. {url}");
                 Console.WriteLine($"   Puntaje: {score:F4}");
                 Console.WriteLine();
                 posicion++;
@@ -110,6 +113,50 @@ namespace BuscadorIndiceInvertido.Index
         {
             byte[] data = Convert.FromBase64String(fileName);
             return System.Text.Encoding.UTF8.GetString(data);
+        }
+        private string DecodificarBase64(string textoBase64)
+        {
+            // Tabla de conversión rápida: cada carácter ASCII -> valor en Base64
+            int[] tabla = new int[256];
+            for (int i = 0; i < tabla.Length; i++) tabla[i] = -1;
+
+            string caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+            for (int i = 0; i < caracteres.Length; i++)
+                tabla[caracteres[i]] = i;
+
+            // Lista doble para acumular los bytes resultantes
+            var bytes = new DoubleList<byte>();
+
+            // Eliminar el relleno '=' al final
+            textoBase64 = textoBase64.TrimEnd('=');
+
+            int acumulador = 0;
+            int bits = 0;
+
+            foreach (char c in textoBase64)
+            {
+                int valor = tabla[c];
+                if (valor < 0)
+                    throw new ArgumentException("Carácter inválido en Base64");
+
+                acumulador = (acumulador << 6) | valor;
+                bits += 6;
+
+                if (bits >= 8)
+                {
+                    bits -= 8;
+                    bytes.Add((byte)((acumulador >> bits) & 0xFF));
+                }
+            }
+
+            // Pasar de DoubleList<byte> a arreglo de bytes
+            byte[] arreglo = new byte[bytes.Count];
+            int indice = 0;
+            foreach (var b in bytes)
+                arreglo[indice++] = b;
+
+            // Convertir los bytes a texto
+            return Encoding.UTF8.GetString(arreglo);
         }
     }
 }
