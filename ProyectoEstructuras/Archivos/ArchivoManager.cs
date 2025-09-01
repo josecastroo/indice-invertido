@@ -1,7 +1,22 @@
-﻿using BuscadorIndiceInvertido.Index;
+﻿using BuscadorIndiceInvertido.Base;
+using BuscadorIndiceInvertido.Index;
+using BuscadorIndiceInvertido.Utilidades;
 
 namespace BuscadorIndiceInvertido.Persistencia
 {
+    internal class DocumentoUnico
+    {
+        public int id;
+        public string fileName;
+        public DoubleList<string> tokens;
+
+        public DocumentoUnico(int id, string fileName, DoubleList<string> tokens)
+        {
+            this.id = id;
+            this.fileName = fileName;
+            this.tokens = tokens;
+        }
+    }
 
     internal class ArchivoManager
     {
@@ -12,47 +27,69 @@ namespace BuscadorIndiceInvertido.Persistencia
             this.rutaArchivo = rutaArchivo;
         }
 
-        public bool GuardarIndiceBinario(IndiceInvertido indice)
+        public bool GuardarIndice(IndiceInvertido indice)
         {
             try
             {
-                using var stream = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 1048576); // 1MB lista
-                using var writer = new BinaryWriter(stream);
-
-                string[] vocabulario = indice.GetVocabulario();
-                int palabrasCount = indice.GetPalabrasCount();
-
-                var lista = new List<byte>();
-
-                EscribirInt32Lista(lista, palabrasCount);
-
-                // escribir todo el vocabulario junto
-                foreach (string palabra in vocabulario)
+                using (FileStream stream = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 65536))
+                using (BinaryWriter writer = new BinaryWriter(stream))
                 {
-                    EscribirStringLista(lista, palabra);
-                    EscribirDoubleLista(lista, indice.GetIDF(palabra));
-                }
 
-                foreach (string palabra in vocabulario)
-                {
-                    var postings = indice.GetPostings(palabra);
-                    EscribirInt32Lista(lista, postings.Count);
+                    string[] vocabulario = indice.GetVocabulario();
+                    int palabrasCount = indice.GetPalabrasCount();
 
-                    foreach (var (doc, freq) in postings)
+                    var documentosUnicos = new DoubleList<DocumentoUnico>();
+                    int docId = 0;
+
+                    for (int i = 0; i < palabrasCount; i++)
                     {
-                        EscribirStringLista(lista, doc.FileName);
-                        EscribirInt32Lista(lista, freq);
-                        EscribirInt32Lista(lista, doc.tokens.Count);
+                        string palabra = vocabulario[i];
+                        var postings = indice.GetPostings(palabra);
 
-                        foreach (string token in doc.tokens)
+                        foreach (var (doc, freq) in postings)
                         {
-                            EscribirStringLista(lista, token);
+                            if (!ExisteDocumento(documentosUnicos, doc.FileName))
+                            {
+                                documentosUnicos.Add(new DocumentoUnico(docId++, doc.FileName, doc.tokens));
+                            }
+                        }
+                    }
+                  writer.Write(documentosUnicos.Count);
+
+                    foreach (var docUnico in documentosUnicos)
+                    {
+                        writer.Write(docUnico.id);          
+                        writer.Write(docUnico.fileName);     
+                        writer.Write(docUnico.tokens.Count); 
+
+                        foreach (string token in docUnico.tokens)
+                        {
+                            writer.Write(token);
+                        }
+                    }
+
+   
+                    writer.Write(palabrasCount);
+
+                    for (int i = 0; i < palabrasCount; i++)
+                    {
+                        string palabra = vocabulario[i];
+
+                        writer.Write(palabra);
+                        writer.Write(indice.GetIDF(palabra));
+
+                        var postings = indice.GetPostings(palabra);
+                        writer.Write(postings.Count);
+
+                        foreach (var (doc, freq) in postings)
+                        {
+                            int docIdRef = BuscarIdDocumento(documentosUnicos, doc.FileName);
+                            writer.Write(docIdRef);  // solo el ID, no todo el documento
+                            writer.Write(freq);
                         }
                     }
                 }
 
-                // escribir toda la lista de una vez
-                writer.Write(lista.ToArray());
                 return true;
             }
             catch (Exception ex)
@@ -62,21 +99,88 @@ namespace BuscadorIndiceInvertido.Persistencia
             }
         }
 
-        private void EscribirInt32Lista(List<byte> lista, int valor)
+        public IndiceInvertido CargarIndice()
         {
-            lista.AddRange(BitConverter.GetBytes(valor));
+            try
+            {
+                if (!File.Exists(rutaArchivo))
+                {
+                    Console.WriteLine("El archivo de índice no existe.");
+                    return null;
+                }
+
+                using (FileStream stream = new FileStream(rutaArchivo, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 65536))
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    var indice = new IndiceInvertido();
+
+         
+                    int docsCount = reader.ReadInt32();
+                    var documentosById = new DoubleList<DocumentoUnico>();
+
+                    for (int i = 0; i < docsCount; i++)
+                    {
+                        int docId = reader.ReadInt32();
+                        string fileName = reader.ReadString();
+                        int tokensCount = reader.ReadInt32();
+
+                        var tokens = new DoubleList<string>();
+                        for (int j = 0; j < tokensCount; j++)
+                        {
+                            tokens.Add(reader.ReadString());
+                        }
+
+                        documentosById.Add(new DocumentoUnico(docId, fileName, tokens));
+                    }
+                
+                    int palabrasCount = reader.ReadInt32();
+
+                    if (palabrasCount == 0)
+                    {
+                        return indice;
+                    }
+
+              
+                    var todosLosDocumentos = new DoubleList<Doc>();
+                    foreach (var docUnico in documentosById)
+                    {
+                        todosLosDocumentos.Add(new Doc(docUnico.fileName, docUnico.tokens));
+                    }
+
+                    indice.Build(todosLosDocumentos);
+
+                    return indice;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al cargar el índice: {ex.Message}");
+                return null;
+            }
         }
 
-        private void EscribirStringLista(List<byte> lista, string valor)
+        private bool ExisteDocumento(DoubleList<DocumentoUnico> documentos, string fileName)
         {
-            var bytes = System.Text.Encoding.UTF8.GetBytes(valor);
-            EscribirInt32Lista(lista, bytes.Length);
-            lista.AddRange(bytes);
+            foreach (var doc in documentos)
+            {
+                if (doc.fileName.Equals(fileName, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        private void EscribirDoubleLista(List<byte> lista, double valor)
+        private int BuscarIdDocumento(DoubleList<DocumentoUnico> documentos, string fileName)
         {
-            lista.AddRange(BitConverter.GetBytes(valor));
+            foreach (var doc in documentos)
+            {
+                if (doc.fileName.Equals(fileName, StringComparison.Ordinal))
+                {
+                    return doc.id;
+                }
+            }
+            return -1; // no encontrado
         }
     }
 }
