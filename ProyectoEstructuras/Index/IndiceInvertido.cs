@@ -126,5 +126,17 @@ namespace BuscadorIndiceInvertido.Index
             double idf = GetIDF(palabra);
             return calculador.CalcularTFIDF(frecuencia, idf);
         }
+        public string[] GetVocabulario()
+        {
+            string[] vocab = new string[palabrasCount];
+            Array.Copy(palabras, vocab, palabrasCount);
+            return vocab;
+        }
+
+        public int GetPalabrasCount()
+        {
+            return palabrasCount;
+        }
     }
+
 }

@@ -15,9 +15,11 @@ namespace BuscadorIndiceInvertido.ContoladorView
         private static MotorBusqueda motor;
         private static bool sistemaInicializado = false;
 
+
+
         public static bool Iniciar()
         {
-            string rutaDocumentos = @"C:\Users\castr\Desktop\Documentos";
+            string rutaDocumentos = @"C:\Users\RuizM\Desktop\Documentos";
             try
             {
                 ProcesadorDoc processor = new ProcesadorDoc();
@@ -83,6 +85,36 @@ namespace BuscadorIndiceInvertido.ContoladorView
                 return;
             }
             motor.IniciarInterfazUsuario();
+        }
+
+        public static bool TieneIndiceDisponible()
+        {
+            return sistemaInicializado && indice != null;
+        }
+
+        public static IndiceInvertido ObtenerIndice()
+        {
+            if (TieneIndiceDisponible())
+                return indice;
+            return null;
+        }
+
+        public static bool ConfigurarConIndiceCargado(IndiceInvertido indiceCargado)
+        {
+            if (indiceCargado == null) return false;
+
+            try
+            {
+                indice = indiceCargado;
+                motor = new MotorBusqueda(indice);
+                sistemaInicializado = true;
+                return true;
+            }
+            catch (Exception)
+            {
+                sistemaInicializado = false;
+                return false;
+            }
         }
 
     }
