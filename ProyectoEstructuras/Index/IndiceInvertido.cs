@@ -10,7 +10,7 @@ namespace BuscadorIndiceInvertido.Index
         private string[] palabras;
         private double[] IDFValores;
         private DoubleList<(Doc doc, int frec)>[] matrizFrec;
-        private int palabrasCount;
+        private int contadorPalabaras;
         private readonly TFIDFCalculador calculador;
 
         public IndiceInvertido()
@@ -18,11 +18,11 @@ namespace BuscadorIndiceInvertido.Index
             palabras = new string[0]; // Array.Empty<string>();
             IDFValores = new double[0]; // Array.Empty<double>();
             matrizFrec = new DoubleList<(Doc doc, int freq)>[0]; // Array.Empty<DoubleList<(Doc doc, int freq)>>();
-            palabrasCount = 0;
+            contadorPalabaras = 0;
             calculador = new TFIDFCalculador();
         }   
 
-        public void Build(DoubleList<Doc> docs, double percentil = 0.0)
+        public void Construir(DoubleList<Doc> docs, double percentil = 0.0)
         {
             if (docs == null || docs.Count == 0) return;
 
@@ -39,15 +39,15 @@ namespace BuscadorIndiceInvertido.Index
             BuildVocab(palabrasUnicas);
 
             Doc[] docArr = docs.ToArray();
-            BuildMatrizFrec(docArr);
+            ConstruirMatrizFrec(docArr);
 
             CalcularIDF(docsTotal);
         }
 
-        private void BuildMatrizFrec(Doc[] arr)
+        private void ConstruirMatrizFrec(Doc[] arr)
         {
             int totalDocs = arr.Length;
-            int[,] tempFrecs = new int[palabrasCount, totalDocs];
+            int[,] tempFrecs = new int[contadorPalabaras, totalDocs];
 
             // contar frecuencias
             for (int docIndex = 0; docIndex < totalDocs; docIndex++)
@@ -62,7 +62,7 @@ namespace BuscadorIndiceInvertido.Index
             }
 
             // pasar a DoubleList
-            for (int j = 0; j < palabrasCount; j++)
+            for (int j = 0; j < contadorPalabaras; j++)
             {
                 matrizFrec[j] = new DoubleList<(Doc doc, int freq)>();
                 for (int k = 0; k < totalDocs; k++)
@@ -77,7 +77,7 @@ namespace BuscadorIndiceInvertido.Index
 
         private void CalcularIDF(int totalDocs)
         {
-            for (int j = 0; j < palabrasCount; j++)
+            for (int j = 0; j < contadorPalabaras; j++)
             {
                 int df = matrizFrec[j].Count;
                 IDFValores[j] = calculador.CalcularIDF(totalDocs, df);
@@ -91,7 +91,7 @@ namespace BuscadorIndiceInvertido.Index
             palabras = new string[Vocabcount];
             IDFValores = new double[Vocabcount];
             matrizFrec = new DoubleList<(Doc doc, int freq)>[Vocabcount];
-            palabrasCount = Vocabcount;
+            contadorPalabaras = Vocabcount;
         }
 
         private void BuildVocab(string[] palabrasUnicas)
@@ -128,14 +128,14 @@ namespace BuscadorIndiceInvertido.Index
         }
         public string[] GetVocabulario()
         {
-            string[] vocab = new string[palabrasCount];
-            Array.Copy(palabras, vocab, palabrasCount);
+            string[] vocab = new string[contadorPalabaras];
+            Array.Copy(palabras, vocab, contadorPalabaras);
             return vocab;
         }
 
-        public int GetPalabrasCount()
+        public int GetContadorPalabras()
         {
-            return palabrasCount;
+            return contadorPalabaras;
         }
     }
 

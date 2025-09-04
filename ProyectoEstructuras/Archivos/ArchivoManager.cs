@@ -7,13 +7,13 @@ namespace BuscadorIndiceInvertido.Persistencia
     internal class DocumentoUnico
     {
         public int id;
-        public string fileName;
+        public string archivo;
         public DoubleList<string> tokens;
 
-        public DocumentoUnico(int id, string fileName, DoubleList<string> tokens)
+        public DocumentoUnico(int id, string archivo, DoubleList<string> tokens)
         {
             this.id = id;
-            this.fileName = fileName;
+            this.archivo = archivo;
             this.tokens = tokens;
         }
     }
@@ -36,7 +36,7 @@ namespace BuscadorIndiceInvertido.Persistencia
                 {
 
                     string[] vocabulario = indice.GetVocabulario();
-                    int palabrasCount = indice.GetPalabrasCount();
+                    int palabrasCount = indice.GetContadorPalabras();
 
                     var documentosUnicos = new DoubleList<DocumentoUnico>();
                     int docId = 0;
@@ -59,7 +59,7 @@ namespace BuscadorIndiceInvertido.Persistencia
                     foreach (var docUnico in documentosUnicos)
                     {
                         writer.Write(docUnico.id);          
-                        writer.Write(docUnico.fileName);     
+                        writer.Write(docUnico.archivo);     
                         writer.Write(docUnico.tokens.Count); 
 
                         foreach (string token in docUnico.tokens)
@@ -115,10 +115,10 @@ namespace BuscadorIndiceInvertido.Persistencia
                     var indice = new IndiceInvertido();
 
          
-                    int docsCount = reader.ReadInt32();
+                    int contadorDocu = reader.ReadInt32();
                     var documentosById = new DoubleList<DocumentoUnico>();
 
-                    for (int i = 0; i < docsCount; i++)
+                    for (int i = 0; i < contadorDocu; i++)
                     {
                         int docId = reader.ReadInt32();
                         string fileName = reader.ReadString();
@@ -144,10 +144,10 @@ namespace BuscadorIndiceInvertido.Persistencia
                     var todosLosDocumentos = new DoubleList<Doc>();
                     foreach (var docUnico in documentosById)
                     {
-                        todosLosDocumentos.Add(new Doc(docUnico.fileName, docUnico.tokens));
+                        todosLosDocumentos.Add(new Doc(docUnico.archivo, docUnico.tokens));
                     }
 
-                    indice.Build(todosLosDocumentos);
+                    indice.Construir(todosLosDocumentos);
 
                     return indice;
                 }
@@ -163,7 +163,7 @@ namespace BuscadorIndiceInvertido.Persistencia
         {
             foreach (var doc in documentos)
             {
-                if (doc.fileName.Equals(fileName, StringComparison.Ordinal))
+                if (doc.archivo.Equals(fileName, StringComparison.Ordinal))
                 {
                     return true;
                 }
@@ -175,7 +175,7 @@ namespace BuscadorIndiceInvertido.Persistencia
         {
             foreach (var doc in documentos)
             {
-                if (doc.fileName.Equals(fileName, StringComparison.Ordinal))
+                if (doc.archivo.Equals(fileName, StringComparison.Ordinal))
                 {
                     return doc.id;
                 }
