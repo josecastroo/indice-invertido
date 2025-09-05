@@ -1,4 +1,4 @@
-﻿using BuscadorIndiceInvertido.ContoladorView;
+using BuscadorIndiceInvertido.ContoladorView;
 using BuscadorIndiceInvertido.Index;
 using BuscadorIndiceInvertido.Persistencia;
 using System;
@@ -8,7 +8,7 @@ namespace BuscadorIndiceInvertido.Interfaz
     public class IniciarSistema
     {
         private static ArchivoManager archivoManager = new ArchivoManager();
-        private static IndiceInvertido indiceGuardado = null;
+        private static IndiceInvertido? indiceGuardado = null;
 
         public static void IniciarMenu()
         {
@@ -64,7 +64,7 @@ namespace BuscadorIndiceInvertido.Interfaz
             Console.WriteLine(new string('-', 50));
 
             Console.Write("Procesando documentos... ");
-            if (!Controller.Iniciar())
+            if (!Controller.Instance.Iniciar())
             {
                 Console.WriteLine("No se pudo inicializar el sistema.");
                 EsperarTecla();
@@ -74,7 +74,7 @@ namespace BuscadorIndiceInvertido.Interfaz
             double percentil = ObtenerPercentilUsuario();
 
             Console.Write("Construyendo índice invertido... ");
-            if (!Controller.BuildIndice(percentil))
+            if (!Controller.Instance.BuildIndice(percentil))
             {
                 Console.WriteLine("No se pudo construir el índice.");
                 EsperarTecla();
@@ -86,7 +86,7 @@ namespace BuscadorIndiceInvertido.Interfaz
             Console.WriteLine("Listo para realizar búsquedas");
             Console.WriteLine();
 
-            Controller.Buscar();
+            Controller.Instance.Buscar();
         }
 
         private static double ObtenerPercentilUsuario()
@@ -126,7 +126,7 @@ namespace BuscadorIndiceInvertido.Interfaz
         private static void GuardarEnArchivos()
         {
             // verificar si hay un índice construido en Controller
-            if (!Controller.TieneIndiceDisponible())
+            if (!Controller.Instance.TieneIndiceDisponible())
             {
                 Console.WriteLine("No hay índice construido para guardar.");
                 Console.WriteLine("Primero debe inicializar la búsqueda (opción 1).");
@@ -136,7 +136,7 @@ namespace BuscadorIndiceInvertido.Interfaz
 
             Console.Write("Guardando índice en archivo... ");
 
-            if (archivoManager.GuardarIndice(Controller.ObtenerIndice()))
+            if (archivoManager.GuardarIndice(Controller.Instance.ObtenerIndice()))
             {
                 Console.WriteLine("Índice guardado exitosamente.");
             }
@@ -159,11 +159,11 @@ namespace BuscadorIndiceInvertido.Interfaz
                 Console.WriteLine("✓ Índice cargado exitosamente.");
 
                 // configurar el Controller con el índice cargado
-                if (Controller.ConfigurarConIndiceCargado(indiceGuardado))
+                if (Controller.Instance.ConfigurarConIndiceCargado(indiceGuardado!))
                 {
                     Console.WriteLine("Sistema listo para realizar búsquedas con el índice cargado.");
                     Console.WriteLine();
-                    Controller.Buscar();
+                    Controller.Instance.Buscar();
                 }
                 else
                 {

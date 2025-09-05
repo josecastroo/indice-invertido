@@ -1,21 +1,33 @@
-﻿using BuscadorIndiceInvertido.Base;
+using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Index;
 using BuscadorIndiceInvertido.ProcesamientoDatos;
 using BuscadorIndiceInvertido.Utilidades;
-
-
-
 
 namespace BuscadorIndiceInvertido.ContoladorView
 {
     internal class Controller
     {
-        private static DoubleList<Doc> documentos;
-        private static IndiceInvertido indice;
-        private static MotorBusqueda motor;
-        private static bool sistemaInicializado = false;
+        private static Controller? _instance;
+        private DoubleList<Doc>? documentos;
+        private IndiceInvertido? indice;
+        private MotorBusqueda? motor;
+        private bool sistemaInicializado = false;
 
-        public static bool Iniciar()
+        private Controller() { }
+
+        public static Controller Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new Controller();
+                }
+                return _instance;
+            }
+        }
+
+        public bool Iniciar()
         {
             string rutaDocumentos = @"../Documentos";
 
@@ -29,12 +41,10 @@ namespace BuscadorIndiceInvertido.ContoladorView
                     Console.WriteLine("No se encontraron documentos para procesar");
                     sistemaInicializado = false;
                     return false;
-
                 }
 
                 sistemaInicializado = true;
                 return true;
-
             }
             catch (Exception)
             {
@@ -44,7 +54,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
             }
         }
 
-        public static bool BuildIndice(double percentil)
+        public bool BuildIndice(double percentil)
         {
             if (!sistemaInicializado || documentos == null)
             {
@@ -70,13 +80,12 @@ namespace BuscadorIndiceInvertido.ContoladorView
             }
         }
 
-        public static bool Inicializar(double percentil)
+        public bool Inicializar(double percentil)
         {
-            
             return Iniciar() && BuildIndice(percentil);
         }
 
-        public static void Buscar()
+        public void Buscar()
         {
             if (!sistemaInicializado || motor == null)
             {
@@ -86,19 +95,19 @@ namespace BuscadorIndiceInvertido.ContoladorView
             motor.IniciarInterfazUsuario();
         }
 
-        public static bool TieneIndiceDisponible()
+        public bool TieneIndiceDisponible()
         {
             return sistemaInicializado && indice != null;
         }
 
-        public static IndiceInvertido ObtenerIndice()
+        public IndiceInvertido ObtenerIndice()
         {
             if (TieneIndiceDisponible())
                 return indice;
             return null;
         }
 
-        public static bool ConfigurarConIndiceCargado(IndiceInvertido indiceCargado)
+        public bool ConfigurarConIndiceCargado(IndiceInvertido indiceCargado)
         {
             if (indiceCargado == null) return false;
 
@@ -115,6 +124,5 @@ namespace BuscadorIndiceInvertido.ContoladorView
                 return false;
             }
         }
-
     }
 }
