@@ -147,7 +147,7 @@ namespace BuscadorIndiceInvertido.Persistencia
                         todosLosDocumentos.Add(new Doc(docUnico.archivo, docUnico.tokens));
                     }
 
-                    indice.Construir(todosLosDocumentos);
+                    indice.Build(todosLosDocumentos);
 
                     return indice;
                 }

@@ -1,4 +1,5 @@
 ﻿using BuscadorIndiceInvertido.Ordenamientos;
+using ProyectoEstructuras.SortStrategies;
 
 namespace BuscadorIndiceInvertido.Utilidades
 {
@@ -25,7 +26,9 @@ namespace BuscadorIndiceInvertido.Utilidades
 
         public StopWordsFiltro()
         {
-            Utils.OrdenarAlfab(StopWords, 0, StopWords.Length - 1);
+            IOrdenamiento<string> radixSort = new RadixSort();
+            radixSort.Ordenar(StopWords, 0, StopWords.Length - 1);
+            //Utils.OrdenarAlfab(StopWords, 0, StopWords.Length - 1); // radix
         }
 
         public DoubleList<string> FiltrarStopWords(string[] palabras)
@@ -44,7 +47,10 @@ namespace BuscadorIndiceInvertido.Utilidades
         private bool IsStopWord(string palabra)
         {
             // BinarySearch devuelve -1 si no encuentra el elemento
-            return Utils.BusquedaBinaria(palabra, StopWords) != -1;
+            // return Utils.BusquedaBinaria(palabra, StopWords) != -1; // busqueda binaria
+            // BusquedaBinaria devuelve -1 si no encuentra la palabra
+            IBusqueda<string> buscador = new BusquedaBinaria<string>();
+            return buscador.Buscar(StopWords, palabra) != -1;
         }
     }
 }

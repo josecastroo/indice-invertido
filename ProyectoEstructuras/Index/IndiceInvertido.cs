@@ -1,7 +1,8 @@
-﻿using BuscadorIndiceInvertido.Base;
+﻿using System;
+using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Calculos;
 using BuscadorIndiceInvertido.Utilidades;
-using System;
+using ProyectoEstructuras.SortStrategies;
 
 namespace BuscadorIndiceInvertido.Index
 {
@@ -22,7 +23,7 @@ namespace BuscadorIndiceInvertido.Index
             calculador = new TFIDFCalculador();
         }   
 
-        public void Construir(DoubleList<Doc> docs, double percentil = 0.0)
+        public void Build(DoubleList<Doc> docs, double percentil = 0.0)
         {
             if (docs == null || docs.Count == 0) return;
 
@@ -32,6 +33,11 @@ namespace BuscadorIndiceInvertido.Index
             string[] palabrasUnicas = zipf.FiltrarVocabulario(docs, percentil);
 
             // ordenar alfabéticamente para la búsqueda binaria
+
+            //IOrdenamiento<string> radixSort = new RadixSort();
+            //radixSort.Ordenar(palabrasUnicas, 0, palabrasUnicas.Length - 1);
+
+            // se usa Array.Sort, no funciona usando Radix ni QuickSort
             Array.Sort(palabrasUnicas, StringComparer.Ordinal);
 
             InicializarAtributos(palabrasUnicas.Length);
@@ -39,12 +45,12 @@ namespace BuscadorIndiceInvertido.Index
             BuildVocab(palabrasUnicas);
 
             Doc[] docArr = docs.ToArray();
-            ConstruirMatrizFrec(docArr);
+            BuildMatrizFrec(docArr);
 
             CalcularIDF(docsTotal);
         }
 
-        private void ConstruirMatrizFrec(Doc[] arr)
+        private void BuildMatrizFrec(Doc[] arr)
         {
             int totalDocs = arr.Length;
             int[,] tempFrecs = new int[contadorPalabaras, totalDocs];

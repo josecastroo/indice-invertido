@@ -1,6 +1,6 @@
 ﻿using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Utilidades;
-
+using ProyectoEstructuras.SortStrategies;
 
 namespace BuscadorIndiceInvertido.Ordenamientos
 {
@@ -24,7 +24,11 @@ namespace BuscadorIndiceInvertido.Ordenamientos
                 arr[i++] = resultado;
             }
 
-            Utils.OrdenarPorPuntaje(arr, 0, arr.Length - 1);
+            // ordenar por score usando QuickSort
+            IOrdenamiento<(Doc doc, double score)> quickSort = new QuickSortDocs();
+            quickSort.Ordenar(arr, 0, arr.Length - 1);
+
+            // Utils.OrdenarPorPuntaje(arr, 0, arr.Length - 1); // numerico quick
 
             // regresar a DoubleList
             var resultadosOrdenados = new DoubleList<(Doc doc, double score)>();
