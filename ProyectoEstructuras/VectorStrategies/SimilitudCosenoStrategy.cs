@@ -1,13 +1,13 @@
-﻿using BuscadorIndiceInvertido.Base;
+using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Index;
 using BuscadorIndiceInvertido.Utilidades;
 using System;
 
 namespace BuscadorIndiceInvertido.Strategies
 {
-    internal class SimilitudCosenoStrategy : IEstrategiaSimilitud
+    public class SimilitudCosenoStrategy : IEstrategiaSimilitud
     {
-        public DoubleList<(Doc doc, double score)> CalcularScores(DoubleList<string> queryTokens, IndiceInvertido indice)
+        public DoubleList<(Doc doc, double score)> CalcularRanking(DoubleList<string> queryTokens, IndiceInvertido indice)
         {
             DoubleList<(Doc doc, double score)> resultados = new DoubleList<(Doc doc, double score)>();
 
@@ -54,7 +54,7 @@ namespace BuscadorIndiceInvertido.Strategies
             return queryVector;
         }
 
-        public DoubleList<Doc> ObtenerDocsCandidatos(DoubleList<string> queryTokens, IndiceInvertido indice)
+        private DoubleList<Doc> ObtenerDocsCandidatos(DoubleList<string> queryTokens, IndiceInvertido indice)
         {
             var candidatos = new DoubleList<Doc>();
 
@@ -73,7 +73,7 @@ namespace BuscadorIndiceInvertido.Strategies
             return candidatos;
         }
 
-        public double[] ConstruirVectorDoc(Doc documento, DoubleList<string> queryTokens, IndiceInvertido indice)
+        private double[] ConstruirVectorDoc(Doc documento, DoubleList<string> queryTokens, IndiceInvertido indice)
         {
             var vector = new double[queryTokens.Count];
             int i = 0;
@@ -87,7 +87,7 @@ namespace BuscadorIndiceInvertido.Strategies
             return vector;
         }
 
-        public double[] ConvertirQuery(DoubleList<(string termino, double tfidf)> queryVector, DoubleList<string> queryTokens)
+        private double[] ConvertirQuery(DoubleList<(string termino, double tfidf)> queryVector, DoubleList<string> queryTokens)
         {
             var vector = new double[queryTokens.Count];
             int i = 0;
@@ -100,7 +100,7 @@ namespace BuscadorIndiceInvertido.Strategies
             return vector;
         }
 
-        public int ContarFrecuencia(string termino, DoubleList<string> tokens)
+        private int ContarFrecuencia(string termino, DoubleList<string> tokens)
         {
             int count = 0;
             foreach (string token in tokens)
@@ -111,7 +111,7 @@ namespace BuscadorIndiceInvertido.Strategies
             return count;
         }
 
-        public int ContarFrecuenciaEnDocumento(string termino, Doc documento)
+        private int ContarFrecuenciaEnDocumento(string termino, Doc documento)
         {
             int count = 0;
             foreach (string token in documento.tokens)
@@ -123,8 +123,8 @@ namespace BuscadorIndiceInvertido.Strategies
             return count;
         }
 
-        public bool ContieneTermino(DoubleList<(string termino, double tfidf)> vector, string termino)
-        {
+        private bool ContieneTermino(DoubleList<(string termino, double tfidf)> vector, string termino)
+        { 
             foreach (var (term, tfidf) in vector)
             {
                 if (term.Equals(termino, StringComparison.Ordinal))
@@ -134,7 +134,7 @@ namespace BuscadorIndiceInvertido.Strategies
             return false;
         }
 
-        public double ObtenerTFIDFDelVector(DoubleList<(string termino, double tfidf)> vector, string termino)
+        private double ObtenerTFIDFDelVector(DoubleList<(string termino, double tfidf)> vector, string termino)
         {
             foreach (var (term, tfidf) in vector)
             {

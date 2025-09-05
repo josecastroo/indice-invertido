@@ -6,7 +6,7 @@ using ProyectoEstructuras.SortStrategies;
 
 namespace BuscadorIndiceInvertido.Index
 {
-    internal class IndiceInvertido
+    public class IndiceInvertido
     {
         private string[] palabras;
         private double[] IDFValores;

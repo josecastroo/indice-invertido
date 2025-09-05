@@ -34,7 +34,7 @@ namespace BuscadorIndiceInvertido.Index
                 return new DoubleList<(Doc doc, double score)>();
 
             // calcular scores
-            DoubleList<(Doc doc, double score)> resultados = procesadorVector.CalcularScores(queryTokens, indice);
+            DoubleList<(Doc doc, double score)> resultados = procesadorVector.CalcularRanking(queryTokens, indice);
 
             // ordenar resultados descendente, es ascendente?
             resultados = rankeador.OrdenarResultados(resultados);

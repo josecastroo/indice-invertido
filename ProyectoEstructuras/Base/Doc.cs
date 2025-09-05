@@ -3,7 +3,7 @@
 
 namespace BuscadorIndiceInvertido.Base
 {
-    internal class Doc
+    public class Doc
     {
         public string FileName { get; set; }
         public DoubleList<string> tokens { get; set; }

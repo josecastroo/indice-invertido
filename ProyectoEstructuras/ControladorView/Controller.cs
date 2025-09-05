@@ -44,7 +44,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
             }
         }
 
-        public static bool ConstruirIndice(double percentil)
+        public static bool BuildIndice(double percentil)
         {
             if (!sistemaInicializado || documentos == null)
             {
@@ -73,7 +73,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
         public static bool Inicializar(double percentil)
         {
             
-            return Iniciar() && ConstruirIndice(percentil);
+            return Iniciar() && BuildIndice(percentil);
         }
 
         public static void Buscar()

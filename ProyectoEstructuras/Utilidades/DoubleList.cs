@@ -2,7 +2,7 @@
 
 namespace BuscadorIndiceInvertido.Utilidades
 {
-    internal class DoubleList<T> : ICollection<T>
+    public class DoubleList<T> : ICollection<T>
     {
         public Node<T> Head;
         public Node<T> Tail;
@@ -175,7 +175,7 @@ namespace BuscadorIndiceInvertido.Utilidades
         }
     }
 
-    internal class Node<T>
+    public class Node<T>
     {
         public T Data { get; set; }
         public Node<T> Next { get; set; }

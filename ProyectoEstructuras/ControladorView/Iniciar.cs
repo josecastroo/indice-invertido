@@ -74,7 +74,7 @@ namespace BuscadorIndiceInvertido.Interfaz
             double percentil = ObtenerPercentilUsuario();
 
             Console.Write("Construyendo índice invertido... ");
-            if (!Controller.ConstruirIndice(percentil))
+            if (!Controller.BuildIndice(percentil))
             {
                 Console.WriteLine("No se pudo construir el índice.");
                 EsperarTecla();
