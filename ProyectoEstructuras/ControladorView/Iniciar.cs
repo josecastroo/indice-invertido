@@ -95,16 +95,16 @@ namespace BuscadorIndiceInvertido.Interfaz
             while (true)
             {
                 Console.WriteLine();
-                Console.Write("Ingrese el percentil de palabras a eliminar (rango 0,0 - 0,7): ");
+                Console.Write("Ingrese el percentil de palabras a eliminar (rango 0,00 - 0,10): ");
                 string input = Console.ReadLine();
 
-                if (double.TryParse(input, out percentil) && percentil >= 0.0 && percentil <= 0.7)
+                if (double.TryParse(input, out percentil) && percentil >= 0.0 && percentil <= 0.1)
                 {
                     return percentil;
                 }
                 else
                 {
-                    Console.WriteLine("Entrada inválida. Por favor, ingrese un número entre 0.0 y 0.7.");
+                    Console.WriteLine("Entrada inválida. Por favor, ingrese un número entre 0.00 y 0.10.");
                 }
             }
         }
