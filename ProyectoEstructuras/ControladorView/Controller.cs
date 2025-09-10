@@ -2,6 +2,7 @@ using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Index;
 using BuscadorIndiceInvertido.ProcesamientoDatos;
 using BuscadorIndiceInvertido.Utilidades;
+using BuscadorIndiceInvertido.Persistencia;
 
 namespace BuscadorIndiceInvertido.ContoladorView
 {
@@ -48,8 +49,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
             }
             catch (Exception e)
             {
-                // Mostrar toda la información de la excepción
-                Console.WriteLine("EXCEPCIÓN DETECTADA:");
+                Console.WriteLine("Excepción:");
                 Console.WriteLine(e.GetType().FullName);
                 Console.WriteLine(e.Message);
                 Console.WriteLine(e.StackTrace);
@@ -94,7 +94,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
         {
             if (!sistemaInicializado || motor == null)
             {
-                Console.WriteLine("El sistema no ha sido inicializado correctamente.");
+                Console.WriteLine("No se ha inicializado el sistema correctamente.");
                 return;
             }
             motor.IniciarInterfazUsuario();
@@ -126,6 +126,45 @@ namespace BuscadorIndiceInvertido.ContoladorView
             catch (Exception)
             {
                 sistemaInicializado = false;
+                return false;
+            }
+        }
+        
+        public bool ActualizarConNuevosDocumentos(double percentil)
+        {
+            if (!sistemaInicializado || indice == null)
+            {
+                Console.WriteLine("No hay índice disponible para actualizar.");
+                return false;
+            }
+
+            try
+            {
+                string rutaDocumentos = @"C:\Users\bryan\RiderProjects\indice-invertido\Documentos";
+        
+                ProcesadorDoc processor = new ProcesadorDoc();
+                DoubleList<Doc> nuevosDocumentos = processor.ProcesarDocumentos(rutaDocumentos);
+
+                if (nuevosDocumentos == null || nuevosDocumentos.Count == 0)
+                {
+                    Console.WriteLine("No se encontraron nuevos documentos para procesar.");
+                    return false;
+                }
+                
+                ArchivoManager archivoManager = new ArchivoManager();
+                bool resultado = archivoManager.ActualizarIndice(indice, nuevosDocumentos, percentil);
+
+                if (resultado)
+                {
+                    motor = new MotorBusqueda(indice);
+                    Console.WriteLine($"Índice actualizado con {nuevosDocumentos.Count} documentos procesados.");
+                }
+
+                return resultado;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error al actualizar el índice: {e.Message}");
                 return false;
             }
         }

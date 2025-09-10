@@ -17,25 +17,6 @@ namespace BuscadorIndiceInvertido.ProcesamientoDatos
             tokenizer = new Tokenizer();
             filtroSW = new StopWordsFiltro();
         }
-
-        private bool EsArchivoTextoValido(string path)
-        {
-            try
-            {
-                byte[] bytes = File.ReadAllBytes(path);
-                // Verifica si hay bytes nulos (0x00), típico de binarios
-                if (bytes.Contains((byte)0))
-                    return false;
-
-                // Intentar decodificar como UTF-8
-                Encoding.UTF8.GetString(bytes);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
         
         public DoubleList<Doc> ProcesarDocumentos(string ruta)
         {
@@ -52,33 +33,18 @@ namespace BuscadorIndiceInvertido.ProcesamientoDatos
 
             foreach (var archivo in archivos)
             {
-                Console.WriteLine($"Procesando: {Path.GetFileName(archivo)}");
-
                 try
                 {
                     string contenido;
-
-                    // Intentar leer en UTF-8, si falla usar codificación por defecto
-                    try
-                    {
-                        contenido = File.ReadAllText(archivo, Encoding.UTF8);
-                    }
-                    catch
-                    {
-                        contenido = File.ReadAllText(archivo, Encoding.Default);
-                    }
-
-                    // Validar contenido
+                    contenido = File.ReadAllText(archivo);;
                     if (string.IsNullOrWhiteSpace(contenido) || contenido.Contains("\0"))
                     {
-                        Console.WriteLine($"ADVERTENCIA: {archivo} no contiene texto válido, se omite.");
+                        Console.WriteLine($" {archivo} no contiene texto válido, se omite.");
                         continue;
                     }
-                    var tokens = tokenizer.TokenizeTexto(contenido); // DoubleList<string> limpio
-
+                    var tokens = tokenizer.TokenizeTexto(contenido);
                     var tokensFiltrados = filtroSW.FiltrarStopWords(tokens);
-
-// Guardar en el Doc
+                    
                     docs.Add(new Doc(Path.GetFileName(archivo), tokensFiltrados));
                 }
                 catch (Exception e)

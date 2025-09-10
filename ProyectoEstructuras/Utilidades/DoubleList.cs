@@ -37,21 +37,21 @@ namespace BuscadorIndiceInvertido.Utilidades
 
         public void Add(T data)
         {
-            Node<T> newNode = new Node<T>(data, null, null);
+            Node<T> nuevo = new Node<T>(data, null, null);
 
             if (Head == null)
             {
-                Head = Tail = newNode;
-                Head.Next = Head;
-                Head.Prev = Head;
+                Head = Tail = nuevo;
+                Head.SetNext(Head);
+                Head.SetPrev(Head);
             }
             else
             {
-                newNode.Prev = Tail;
-                newNode.Next = Head;
-                Tail.Next = newNode;
-                Tail = newNode;
-                Head.Prev = newNode;
+                nuevo.SetPrev(Tail);
+                nuevo.SetNext(Head);
+                Tail.SetNext(nuevo);
+                Tail = nuevo;
+                Head.SetPrev(nuevo);
             }
 
             count++;
@@ -66,10 +66,10 @@ namespace BuscadorIndiceInvertido.Utilidades
 
             do
             {
-                next = current.Next;
+                next = current.GetNext();
 
-                current.Next = null;
-                current.Prev = null;
+                current.SetNext(null);
+                current.SetPrev(null);
 
                 current = next;
             } while (current != Head);
@@ -87,8 +87,8 @@ namespace BuscadorIndiceInvertido.Utilidades
 
             do
             {
-                if (current.Data.Equals(data)) return true;
-                current = current.Next;
+                if (current.GetData().Equals(data)) return true;
+                current = current.GetNext();
             } while (current != Head);
 
             return false;
@@ -107,8 +107,8 @@ namespace BuscadorIndiceInvertido.Utilidades
 
             do
             {
-                array[i++] = current.Data;
-                current = current.Next;
+                array[i++] = current.GetData();
+                current = current.GetNext();
             } while (current != Head);
         }
 
@@ -120,7 +120,7 @@ namespace BuscadorIndiceInvertido.Utilidades
 
             do
             {
-                if (current.Data.Equals(data))
+                if (current.GetData().Equals(data))
                 {
                     if (current == Head && current == Tail)
                     {
@@ -128,29 +128,29 @@ namespace BuscadorIndiceInvertido.Utilidades
                     }
                     else if (current == Head)
                     {
-                        Head = Head.Next;
-                        Head.Prev = Tail;
-                        Tail.Next = Head;
+                        Head = Head.GetNext();
+                        Head.SetPrev(Tail);
+                        Tail.SetNext(Head);
                     }
                     else if (current == Tail)
                     {
-                        Tail = Tail.Prev;
-                        Tail.Next = Head;
-                        Head.Prev = Tail;
+                        Tail = Tail.GetPrev();
+                        Tail.SetNext(Head);
+                        Head.SetPrev(Tail);
                     }
                     else
                     {
-                        current.Prev.Next = current.Next;
-                        current.Next.Prev = current.Prev;
+                        current.GetPrev().SetNext(current.GetNext());
+                        current.GetNext().SetPrev(current.GetPrev());
                     }
 
-                    current.Next = null;
-                    current.Prev = null;
+                    current.SetNext(null);
+                    current.SetPrev(null);
                     count--;
                     return true;
                 }
 
-                current = current.Next;
+                current = current.GetNext();
             } while (current != Head);
 
             return false;
@@ -164,8 +164,8 @@ namespace BuscadorIndiceInvertido.Utilidades
 
             do
             {
-                yield return current.Data;
-                current = current.Next;
+                yield return current.GetData();
+                current = current.GetNext();
             } while (current != Head);
         }
 
@@ -177,15 +177,60 @@ namespace BuscadorIndiceInvertido.Utilidades
 
     public class Node<T>
     {
-        public T Data { get; set; }
-        public Node<T> Next { get; set; }
-        public Node<T> Prev { get; set; }
+        public T data;
+        public Node<T> next;
+        public Node<T> prev;
 
         public Node(T data, Node<T> next, Node<T> prev)
         {
-            Data = data;
-            Next = next;
-            Prev = prev;
+            this.data = data;
+            this.next = next;
+            this.prev = prev;
+        }
+        public T GetData()
+        {
+            return data;
+        }
+
+        public void SetData(T value)
+        {
+            data = value;
+        }
+
+        public Node<T> GetNext()
+        {
+            return next;
+        }
+
+        public void SetNext(Node<T> value)
+        {
+            next = value;
+        }
+
+        public Node<T> GetPrev()
+        {
+            return prev;
+        }
+
+        public void SetPrev(Node<T> value)
+        {
+            prev = value;
+        }
+        
+        public void Disconnect()
+        {
+            if (prev != null)
+            {
+                prev.next = next;
+            }
+        
+            if (next != null)
+            {
+                next.prev = prev;
+            }
+        
+            prev = null;
+            next = null;
         }
     }
 }

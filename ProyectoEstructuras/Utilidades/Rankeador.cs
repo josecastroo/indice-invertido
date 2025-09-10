@@ -11,26 +11,21 @@ namespace BuscadorIndiceInvertido.Ordenamientos
 
         }
 
-        // tal vez se pueda optimizar quitando las conversiones
+        //aqui se usa quick sort (en el peor de los casos n^2 pero raro que ocurra
         public DoubleList<(Doc doc, double score)> OrdenarResultados(DoubleList<(Doc doc, double score)> resultados)
         {
             if (resultados.Count <= 1) return resultados;
-
-            // convertir a array para usar QuickSort
+            
             (Doc doc, double score)[] arr = new (Doc doc, double score)[resultados.Count];
             int i = 0;
             foreach (var resultado in resultados)
             {
                 arr[i++] = resultado;
             }
-
-            // ordenar por score usando QuickSort
+            
             IOrdenamiento<(Doc doc, double score)> quickSort = new QuickSortDocs();
             quickSort.Ordenar(arr, 0, arr.Length - 1);
-
-            // Utils.OrdenarPorPuntaje(arr, 0, arr.Length - 1); // numerico quick
-
-            // regresar a DoubleList
+            
             var resultadosOrdenados = new DoubleList<(Doc doc, double score)>();
             foreach (var resultado in arr)
             {

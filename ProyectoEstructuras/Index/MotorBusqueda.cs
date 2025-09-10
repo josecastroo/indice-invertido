@@ -109,20 +109,17 @@ namespace BuscadorIndiceInvertido.Index
             return resultadosLimitados;
         }
 
-        private string DecodificarBase64(string textoBase64)
+        private string DecodificarBase64(string textoBase64) //codigo extra para mejorar experiencia en los url
         {
-            // Tabla de conversión rápida: cada carácter ASCII -> valor en Base64
             int[] tabla = new int[256];
             for (int i = 0; i < tabla.Length; i++) tabla[i] = -1;
 
             string caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
             for (int i = 0; i < caracteres.Length; i++)
                 tabla[caracteres[i]] = i;
-
-            // Lista doble para acumular los bytes resultantes
+            
             var bytes = new DoubleList<byte>();
-
-            // Eliminar el relleno '=' al final
+            
             textoBase64 = textoBase64.TrimEnd('=');
 
             int acumulador = 0;
@@ -143,14 +140,12 @@ namespace BuscadorIndiceInvertido.Index
                     bytes.Add((byte)((acumulador >> bits) & 0xFF));
                 }
             }
-
-            // Pasar de DoubleList<byte> a arreglo de bytes
+            
             byte[] arreglo = new byte[bytes.Count];
             int indice = 0;
             foreach (var b in bytes)
                 arreglo[indice++] = b;
-
-            // Convertir los bytes a texto
+            //se convierten los bytes a string
             return Encoding.UTF8.GetString(arreglo);
         }
     }

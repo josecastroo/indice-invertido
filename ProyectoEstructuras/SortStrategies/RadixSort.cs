@@ -13,8 +13,7 @@ namespace ProyectoEstructuras.SortStrategies
         {
             if (arr == null || arr.Length == 0 || inicio > fin)
                 return;
-
-            // Encontrar la longitud máxima
+            
             int maxLen = 0;
             for (int i = inicio; i <= fin; i++)
             {
@@ -24,8 +23,7 @@ namespace ProyectoEstructuras.SortStrategies
 
             if (maxLen == 0)
                 return;
-
-            // Ordenar por cada posición de carácter, desde la derecha (menos significativo) hacia la izquierda
+            
             for (int pos = maxLen - 1; pos >= 0; pos--)
             {
                 CountingSort(arr, inicio, fin, pos);
@@ -37,25 +35,20 @@ namespace ProyectoEstructuras.SortStrategies
             if (arr == null || arr.Length == 0 || inicio > fin)
                 return;
 
-            const int R = 256; // 256 caracteres ASCII
-            int[] count = new int[R + 2]; // +2 para manejar el offset
+            const int R = 256; // tema Ascii
+            int[] count = new int[R + 2];
             string[] aux = new string[fin - inicio + 1];
-
-            // Contar frecuencias
             for (int i = inicio; i <= fin; i++)
             {
                 int charCode = GetCharAt(arr[i], pos);
-                if (charCode >= 0 && charCode < R + 1) // Verificación de bounds
+                if (charCode >= 0 && charCode < R + 1) 
                 {
                     count[charCode + 1]++;
                 }
             }
-
-            // Calcular posiciones acumulativas
             for (int r = 1; r < count.Length; r++)
                 count[r] += count[r - 1];
-
-            // Distribuir elementos
+            
             for (int i = inicio; i <= fin; i++)
             {
                 int charCode = GetCharAt(arr[i], pos);
@@ -64,8 +57,7 @@ namespace ProyectoEstructuras.SortStrategies
                     aux[count[charCode]++] = arr[i];
                 }
             }
-
-            // Copiar de vuelta al array original
+            
             for (int i = inicio; i <= fin; i++)
                 arr[i] = aux[i - inicio];
         }

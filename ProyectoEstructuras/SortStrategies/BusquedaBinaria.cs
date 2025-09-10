@@ -26,7 +26,7 @@ namespace ProyectoEstructuras.SortStrategies
                     derecha = medio - 1;
             }
 
-            return -1; // no encontrado
+            return -1; 
         }
     }
 }

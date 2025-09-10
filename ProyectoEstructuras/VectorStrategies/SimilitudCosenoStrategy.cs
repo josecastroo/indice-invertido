@@ -1,6 +1,7 @@
 using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Index;
 using BuscadorIndiceInvertido.Utilidades;
+using ProyectoEstructuras.Utilidades;
 using System;
 
 namespace BuscadorIndiceInvertido.Strategies
@@ -14,17 +15,16 @@ namespace BuscadorIndiceInvertido.Strategies
             // crear vector de consulta TF-IDF
             DoubleList<(string termino, double tfidf)> queryVector = ConstruirVectorQuery(queryTokens, indice);
             if (queryVector.Count == 0) return resultados;
-
-            // obtener documentos candidatos (los que tienen un termino de la query minimo)
+            
             DoubleList<Doc> documentosCandidatos = ObtenerDocsCandidatos(queryTokens, indice);
 
             // calcular similitud para cada documento candidato
             foreach (Doc doc in documentosCandidatos)
             {
-                double[] vectorDoc = ConstruirVectorDoc(doc, queryTokens, indice);
-                double[] vectorQuery = ConvertirQuery(queryVector, queryTokens);
+                Vector vectorDoc = ConstruirVectorDoc(doc, queryTokens, indice);
+                Vector vectorQuery = ConvertirQuery(queryVector, queryTokens);
 
-                double score = CalcularSimilitudCoseno(vectorQuery, vectorDoc);
+                double score = vectorQuery.SimilitudCoseno(vectorDoc);
 
                 if (score > 0)
                 {
@@ -73,31 +73,31 @@ namespace BuscadorIndiceInvertido.Strategies
             return candidatos;
         }
 
-        private double[] ConstruirVectorDoc(Doc documento, DoubleList<string> queryTokens, IndiceInvertido indice)
+        private Vector ConstruirVectorDoc(Doc documento, DoubleList<string> queryTokens, IndiceInvertido indice)
         {
-            var vector = new double[queryTokens.Count];
+            var valores = new double[queryTokens.Count];
             int i = 0;
 
             foreach (string token in queryTokens)
             {
                 int freq = ContarFrecuenciaEnDocumento(token, documento);
-                vector[i++] = indice.GetTFIDF(token, freq);
+                valores[i++] = indice.GetTFIDF(token, freq);
             }
 
-            return vector;
+            return new Vector(valores);
         }
 
-        private double[] ConvertirQuery(DoubleList<(string termino, double tfidf)> queryVector, DoubleList<string> queryTokens)
+        private Vector ConvertirQuery(DoubleList<(string termino, double tfidf)> queryVector, DoubleList<string> queryTokens)
         {
-            var vector = new double[queryTokens.Count];
+            var valores = new double[queryTokens.Count];
             int i = 0;
 
             foreach (string token in queryTokens)
             {
-                vector[i++] = ObtenerTFIDFDelVector(queryVector, token);
+                valores[i++] = ObtenerTFIDFDelVector(queryVector, token);
             }
 
-            return vector;
+            return new Vector(valores);
         }
 
         private int ContarFrecuencia(string termino, DoubleList<string> tokens)
@@ -144,9 +144,8 @@ namespace BuscadorIndiceInvertido.Strategies
 
             return 0.0;
         }
-
-        // Método específico de similitud coseno
-        private double CalcularSimilitudCoseno(double[] vector1, double[] vector2)
+        
+       /* private double CalcularSimilitudCoseno(double[] vector1, double[] vector2)
         {
             double productoPunto = 0;
             for (int i = 0; i < vector1.Length; i++)
@@ -174,6 +173,6 @@ namespace BuscadorIndiceInvertido.Strategies
             }
 
             return Math.Sqrt(suma);
-        }
+        }*/
     }
 }

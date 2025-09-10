@@ -29,7 +29,6 @@ namespace BuscadorIndiceInvertido.Utilidades
             for (int i = 0; i < StopWords.Length; i++)
                 StopWords[i] = StopWords[i].ToLower();
             
-            // Solo ordenar si hay más de un elemento
             if (StopWords != null && StopWords.Length > 1)
             {
                 IOrdenamiento<string> radixSort = new RadixSort();
@@ -41,7 +40,7 @@ namespace BuscadorIndiceInvertido.Utilidades
             var tokens = new DoubleList<string>();
             foreach (var palabra in palabras)
             {
-                if (Array.BinarySearch(StopWords, palabra) < 0) // no está en stopwords
+                if (Array.BinarySearch(StopWords, palabra) < 0)
                     tokens.Add(palabra);
             }
             return tokens;

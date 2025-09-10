@@ -23,6 +23,7 @@ namespace BuscadorIndiceInvertido.Interfaz
                 Console.WriteLine("1. Iniciarlizar búsqueda");
                 Console.WriteLine("2. Guardar en archivos");
                 Console.WriteLine("3. Cargar de archivos");
+                Console.WriteLine("4. Actualizar índice (agregar documentos)");
                 Console.WriteLine("0. Salir");
                 Console.WriteLine();
                 Console.Write("Ingrese la opción que desea realizar: ");
@@ -48,6 +49,10 @@ namespace BuscadorIndiceInvertido.Interfaz
                         CargarDeArchivos();
                         break;
 
+                    case 4:
+                        ActualizarIndice();
+                        break;
+                    
                     case 0:
                         Console.WriteLine("Saliendo del sistema...");
                         return;
@@ -117,10 +122,50 @@ namespace BuscadorIndiceInvertido.Interfaz
                 }
                 else
                 {
-                    Console.WriteLine("Entrada inválida. Por favor, ingrese un número entre 0.00 y 0.10.");
+                    Console.WriteLine("Entrada inválida. Ingrese un número entre 0.00 y 0.10.");
                 }
             }
         }
+        
+        private static void ActualizarIndice()
+        {
+            if (!Controller.Instance.TieneIndiceDisponible())
+            {
+                Console.WriteLine("No hay índice disponible para actualizar.");
+                Console.WriteLine("Primero debe cargar un índice (opción 3) o inicializar la búsqueda (opción 1).");
+                EsperarTecla();
+                return;
+            }
+            Console.WriteLine("Actualizando índice con nuevos documentos!");
+            double percentil = ObtenerPercentilUsuario();
+            
+            // usamos el controller para nuevos documentos y actualizar
+            if (Controller.Instance.ActualizarConNuevosDocumentos(percentil))
+            {
+                Console.WriteLine("Índice actualizado correctamente.");
+                Console.Write("Desea guardar el índice actualizado? (s/n): ");
+                string respuesta = Console.ReadLine()?.ToLower().Trim();
+                
+                if (respuesta == "s" || respuesta == "si")
+                {
+                    if (archivoManager.GuardarIndice(Controller.Instance.ObtenerIndice()))
+                    {
+                        Console.WriteLine("Índice actualizado guardado exitosamente.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error al guardar el índice actualizado.");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error al actualizar el índice.");
+            }
+
+            EsperarTecla();
+        }
+
 
         private static void MostrarBienvenida()
         {
@@ -133,7 +178,7 @@ namespace BuscadorIndiceInvertido.Interfaz
         private static void EsperarTecla()
         {
             Console.WriteLine();
-            Console.WriteLine("Presione cualquier tecla para salir...");
+            Console.WriteLine("Presione cualquier tecla para salir");
             Console.ReadKey();
         }
         private static void GuardarEnArchivos()
@@ -147,7 +192,7 @@ namespace BuscadorIndiceInvertido.Interfaz
                 return;
             }
 
-            Console.Write("Guardando índice en archivo... ");
+            Console.Write("Guardando índice en archivo!");
 
             if (archivoManager.GuardarIndice(Controller.Instance.ObtenerIndice()))
             {
@@ -163,13 +208,13 @@ namespace BuscadorIndiceInvertido.Interfaz
 
         private static void CargarDeArchivos()
         {
-            Console.Write("Cargando índice desde archivo... ");
+            Console.Write("Cargando índice desde archivo! ");
 
             indiceGuardado = archivoManager.CargarIndice();
 
             if (indiceGuardado != null)
             {
-                Console.WriteLine("✓ Índice cargado exitosamente.");
+                Console.WriteLine("Índice cargado exitosamente.");
 
                 // configurar el Controller con el índice cargado
                 if (Controller.Instance.ConfigurarConIndiceCargado(indiceGuardado!))

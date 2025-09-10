@@ -34,8 +34,16 @@ internal class MergeSortGenerico<T> : IOrdenamiento<T>
         int n2 = fin - medio;
         T[] izquierda = new T[n1];
         T[] derecha = new T[n2];
-        Array.Copy(arr, inicio, izquierda, 0, n1);
-        Array.Copy(arr, medio + 1, derecha, 0, n2);
+        
+        for (int x = 0; x < n1; x++)
+        {
+            izquierda[x] = arr[inicio + x];
+        }
+        for (int y = 0; y < n2; y++)
+        {
+            derecha[y] = arr[medio + 1 + y];
+        }
+        
         int i = 0, j = 0, k = inicio;
         while (i < n1 && j < n2)
         {

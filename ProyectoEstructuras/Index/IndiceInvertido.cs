@@ -35,18 +35,11 @@ namespace BuscadorIndiceInvertido.Index
             if (palabrasUnicas == null || palabrasUnicas.Length == 0)
             {
                 Console.WriteLine("Advertencia: el vocabulario está vacío. No se construirá índice.");
-                return; // No hay nada que construir
+                return;
             }
-
-            // ordenar alfabéticamente para la búsqueda binaria
-
-            //IOrdenamiento<string> radixSort = new RadixSort();
-            //radixSort.Ordenar(palabrasUnicas, 0, palabrasUnicas.Length - 1);
-
-            // se usa Array.Sort, no funciona usando Radix ni QuickSort
+            
             IOrdenamiento<string> radixSort = new RadixSort();
             radixSort.Ordenar(palabrasUnicas, 0, palabrasUnicas.Length - 1);
-            Console.WriteLine("Vocabulario ordenado con Radix: " + string.Join(", ", palabrasUnicas));
 
             InicializarAtributos(palabrasUnicas.Length);
 
@@ -74,7 +67,7 @@ namespace BuscadorIndiceInvertido.Index
                 {
                     int wordIndex = Array.BinarySearch(palabras, token, StringComparer.Ordinal);
                     if (wordIndex < 0)
-                        continue; // token no está en vocabulario
+                        continue; 
                     tempFrecs[wordIndex, docIndex]++;
                 }
             }
@@ -102,7 +95,31 @@ namespace BuscadorIndiceInvertido.Index
             }
         }
 
+        public void RestaurarDesdeArchivo(string[] vocabulario, double[] idfValues, 
+            DoubleList<(Doc doc, int freq)>[] matrizPostings)
+        {
+            contadorPalabaras = vocabulario.Length;
+    
+            palabras = new string[contadorPalabaras];
+            IDFValores = new double[contadorPalabaras];
+            matrizFrec = new DoubleList<(Doc doc, int freq)>[contadorPalabaras];
+    
+            Array.Copy(vocabulario, palabras, contadorPalabaras);
+            Array.Copy(idfValues, IDFValores, contadorPalabaras);
+    
+            for (int i = 0; i < contadorPalabaras; i++)
+            {
+                matrizFrec[i] = matrizPostings[i];
+            }
+        }
         
+        public void InicializarVacio(int tamanoVocabulario)
+        {
+            contadorPalabaras = tamanoVocabulario;
+            palabras = new string[tamanoVocabulario];
+            IDFValores = new double[tamanoVocabulario];
+            matrizFrec = new DoubleList<(Doc doc, int freq)>[tamanoVocabulario];
+        }
 
         private void InicializarAtributos(int Vocabcount)
         {
@@ -119,8 +136,7 @@ namespace BuscadorIndiceInvertido.Index
                 palabras[i] = palabrasUnicas[i];
             }
         }
-
-        // metodos de acceso
+        
         public DoubleList<(Doc doc, int freq)> GetPostings(string palabra)
         {
             int indice = Array.BinarySearch(palabras, palabra, StringComparer.Ordinal);
@@ -154,6 +170,12 @@ namespace BuscadorIndiceInvertido.Index
         public int GetContadorPalabras()
         {
             return contadorPalabaras;
+        }
+        public void SetPalabra(int indice, string palabra, double idf, DoubleList<(Doc doc, int freq)> postings)
+        {
+            palabras[indice] = palabra;
+            IDFValores[indice] = idf;
+            matrizFrec[indice] = postings;
         }
     }
 
