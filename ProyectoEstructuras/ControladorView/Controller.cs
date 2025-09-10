@@ -29,7 +29,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
 
         public bool Iniciar()
         {
-            string rutaDocumentos = @"../Documentos";
+            string rutaDocumentos = @"C:\Users\bryan\RiderProjects\indice-invertido\Documentos";
 
             try
             {
@@ -46,9 +46,13 @@ namespace BuscadorIndiceInvertido.ContoladorView
                 sistemaInicializado = true;
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Console.WriteLine("Error al procesar los documentos");
+                // Mostrar toda la información de la excepción
+                Console.WriteLine("EXCEPCIÓN DETECTADA:");
+                Console.WriteLine(e.GetType().FullName);
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
                 sistemaInicializado = false;
                 return false;
             }
@@ -72,9 +76,10 @@ namespace BuscadorIndiceInvertido.ContoladorView
                 sistemaInicializado = true;
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Console.WriteLine("Error al construir el indice");
+                Console.WriteLine("Error al construir el índice: " + e.Message);
+                Console.WriteLine(e.StackTrace);
                 sistemaInicializado = false;
                 return false;
             }

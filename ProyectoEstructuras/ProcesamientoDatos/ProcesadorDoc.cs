@@ -1,5 +1,7 @@
-﻿using BuscadorIndiceInvertido.Base;
+﻿using System.Text;
+using BuscadorIndiceInvertido.Base;
 using BuscadorIndiceInvertido.Utilidades;
+using System.Text.RegularExpressions;
 
 namespace BuscadorIndiceInvertido.ProcesamientoDatos
 {
@@ -16,24 +18,77 @@ namespace BuscadorIndiceInvertido.ProcesamientoDatos
             filtroSW = new StopWordsFiltro();
         }
 
-        public DoubleList<Doc> ProcesarDocumentos(string url)
+        private bool EsArchivoTextoValido(string path)
         {
-            DoubleList<Doc> docs = new DoubleList<Doc>();
-
-            foreach (var file in Directory.GetFiles(url, "*.txt"))
+            try
             {
-                string contenido = File.ReadAllText(file);
+                byte[] bytes = File.ReadAllBytes(path);
+                // Verifica si hay bytes nulos (0x00), típico de binarios
+                if (bytes.Contains((byte)0))
+                    return false;
 
-                DoubleList<string> tokens = tokenizer.TokenizeTexto(contenido);
+                // Intentar decodificar como UTF-8
+                Encoding.UTF8.GetString(bytes);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        
+        public DoubleList<Doc> ProcesarDocumentos(string ruta)
+        {
+            var docs = new DoubleList<Doc>();
 
-                string[] tokenArr = new string[tokens.Count];
-                tokens.CopyTo(tokenArr, 0);
-
-                DoubleList<string> tokensFiltrados = filtroSW.FiltrarStopWords(tokenArr);
-
-                docs.Add(new Doc(Path.GetFileName(file), tokensFiltrados));
+            if (!Directory.Exists(ruta))
+            {
+                Console.WriteLine($"La ruta {ruta} no existe.");
+                return docs;
             }
 
+            var archivos = Directory.GetFiles(ruta, "*.txt");
+            Console.WriteLine($"Archivos encontrados: {archivos.Length}");
+
+            foreach (var archivo in archivos)
+            {
+                Console.WriteLine($"Procesando: {Path.GetFileName(archivo)}");
+
+                try
+                {
+                    string contenido;
+
+                    // Intentar leer en UTF-8, si falla usar codificación por defecto
+                    try
+                    {
+                        contenido = File.ReadAllText(archivo, Encoding.UTF8);
+                    }
+                    catch
+                    {
+                        contenido = File.ReadAllText(archivo, Encoding.Default);
+                    }
+
+                    // Validar contenido
+                    if (string.IsNullOrWhiteSpace(contenido) || contenido.Contains("\0"))
+                    {
+                        Console.WriteLine($"ADVERTENCIA: {archivo} no contiene texto válido, se omite.");
+                        continue;
+                    }
+                    var tokens = tokenizer.TokenizeTexto(contenido); // DoubleList<string> limpio
+
+                    var tokensFiltrados = filtroSW.FiltrarStopWords(tokens);
+
+// Guardar en el Doc
+                    docs.Add(new Doc(Path.GetFileName(archivo), tokensFiltrados));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"ERROR al procesar {archivo}: {e.GetType().Name} - {e.Message}");
+                    continue;
+                }
+            }
+
+            Console.WriteLine($"Documentos procesados correctamente: {docs.Count}");
             return docs;
         }
     }

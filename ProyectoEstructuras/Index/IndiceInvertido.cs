@@ -31,6 +31,12 @@ namespace BuscadorIndiceInvertido.Index
 
             Zipf zipf = new Zipf();
             string[] palabrasUnicas = zipf.FiltrarVocabulario(docs, percentil);
+            
+            if (palabrasUnicas == null || palabrasUnicas.Length == 0)
+            {
+                Console.WriteLine("Advertencia: el vocabulario está vacío. No se construirá índice.");
+                return; // No hay nada que construir
+            }
 
             // ordenar alfabéticamente para la búsqueda binaria
 
@@ -38,32 +44,38 @@ namespace BuscadorIndiceInvertido.Index
             //radixSort.Ordenar(palabrasUnicas, 0, palabrasUnicas.Length - 1);
 
             // se usa Array.Sort, no funciona usando Radix ni QuickSort
-            Array.Sort(palabrasUnicas, StringComparer.Ordinal);
+            IOrdenamiento<string> radixSort = new RadixSort();
+            radixSort.Ordenar(palabrasUnicas, 0, palabrasUnicas.Length - 1);
+            Console.WriteLine("Vocabulario ordenado con Radix: " + string.Join(", ", palabrasUnicas));
 
             InicializarAtributos(palabrasUnicas.Length);
 
             BuildVocab(palabrasUnicas);
 
-            Doc[] docArr = docs.ToArray();
-            BuildMatrizFrec(docArr);
-
-            CalcularIDF(docsTotal);
+            if (palabrasUnicas.Length > 0)
+            {
+                Doc[] docArr = docs.ToArray();
+                BuildMatrizFrec(docArr);
+                CalcularIDF(docsTotal);
+            }
         }
 
         private void BuildMatrizFrec(Doc[] arr)
         {
             int totalDocs = arr.Length;
             int[,] tempFrecs = new int[contadorPalabaras, totalDocs];
-
-            // contar frecuencias
-            for (int docIndex = 0; docIndex < totalDocs; docIndex++)
+        
+            Console.WriteLine($"contadorPalabaras={contadorPalabaras}, totalDocs={totalDocs}");
+        // contar frecuencias
+        for (int docIndex = 0; docIndex < totalDocs; docIndex++)
             {
                 Doc doc = arr[docIndex];
-                foreach (string token in doc.tokens)
+                foreach (var token in doc.tokens)
                 {
                     int wordIndex = Array.BinarySearch(palabras, token, StringComparer.Ordinal);
-                    if (wordIndex >= 0)
-                        tempFrecs[wordIndex, docIndex]++;
+                    if (wordIndex < 0)
+                        continue; // token no está en vocabulario
+                    tempFrecs[wordIndex, docIndex]++;
                 }
             }
 

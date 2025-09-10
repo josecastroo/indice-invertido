@@ -49,7 +49,7 @@ namespace BuscadorIndiceInvertido.Index
                 Console.WriteLine("Ingrese la consulta ('salir' para terminar):");
                 Console.Write("> ");
 
-                string query = Console.ReadLine();
+                string query = Console.ReadLine()?.ToLower().Trim();
 
                 if (string.IsNullOrWhiteSpace(query))
                     continue;

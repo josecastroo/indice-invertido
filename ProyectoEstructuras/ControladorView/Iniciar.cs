@@ -2,6 +2,7 @@ using BuscadorIndiceInvertido.ContoladorView;
 using BuscadorIndiceInvertido.Index;
 using BuscadorIndiceInvertido.Persistencia;
 using System;
+using System.Linq.Expressions;
 
 namespace BuscadorIndiceInvertido.Interfaz
 {
@@ -73,10 +74,22 @@ namespace BuscadorIndiceInvertido.Interfaz
 
             double percentil = ObtenerPercentilUsuario();
 
-            Console.Write("Construyendo índice invertido... ");
-            if (!Controller.Instance.BuildIndice(percentil))
+            try
             {
-                Console.WriteLine("No se pudo construir el índice.");
+                Console.Write("Construyendo índice invertido... ");
+                if (!Controller.Instance.BuildIndice(percentil))
+                {
+                    Console.WriteLine("No se pudo construir el índice. Tal vez no hay suficientes palabras para procesar.");
+                    EsperarTecla();
+                    return;
+                }
+                Console.WriteLine("Índice construido correctamente.");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error inesperado al construir el índice:");
+                Console.WriteLine(e.Message);
+                Console.WriteLine(e.StackTrace);
                 EsperarTecla();
                 return;
             }

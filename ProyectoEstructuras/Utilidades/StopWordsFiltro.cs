@@ -26,19 +26,39 @@ namespace BuscadorIndiceInvertido.Utilidades
 
         public StopWordsFiltro()
         {
-            IOrdenamiento<string> radixSort = new RadixSort();
-            radixSort.Ordenar(StopWords, 0, StopWords.Length - 1);
-            //Utils.OrdenarAlfab(StopWords, 0, StopWords.Length - 1); // radix
+            for (int i = 0; i < StopWords.Length; i++)
+                StopWords[i] = StopWords[i].ToLower();
+            
+            // Solo ordenar si hay más de un elemento
+            if (StopWords != null && StopWords.Length > 1)
+            {
+                IOrdenamiento<string> radixSort = new RadixSort();
+                radixSort.Ordenar(StopWords, 0, StopWords.Length - 1);
+            }
+        }
+        public DoubleList<string> FiltrarStopWords(DoubleList<string> palabras)
+        {
+            var tokens = new DoubleList<string>();
+            foreach (var palabra in palabras)
+            {
+                if (Array.BinarySearch(StopWords, palabra) < 0) // no está en stopwords
+                    tokens.Add(palabra);
+            }
+            return tokens;
         }
 
         public DoubleList<string> FiltrarStopWords(string[] palabras)
         {
             DoubleList<string> tokens = new DoubleList<string>();
 
+            if (palabras == null || palabras.Length == 0)
+                return tokens;
+
             foreach (string palabra in palabras)
             {
-                if (!IsStopWord(palabra))
-                    tokens.Add(palabra);
+                string palabraLower = palabra.ToLower();
+                if (!IsStopWord(palabraLower))
+                    tokens.Add(palabraLower);
             }
 
             return tokens;
@@ -46,9 +66,9 @@ namespace BuscadorIndiceInvertido.Utilidades
 
         private bool IsStopWord(string palabra)
         {
-            // BinarySearch devuelve -1 si no encuentra el elemento
-            // return Utils.BusquedaBinaria(palabra, StopWords) != -1; // busqueda binaria
-            // BusquedaBinaria devuelve -1 si no encuentra la palabra
+            if (string.IsNullOrEmpty(palabra) || StopWords == null || StopWords.Length == 0)
+                return false;
+
             IBusqueda<string> buscador = new BusquedaBinaria<string>();
             return buscador.Buscar(StopWords, palabra) != -1;
         }
