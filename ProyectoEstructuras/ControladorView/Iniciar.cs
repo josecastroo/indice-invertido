@@ -192,7 +192,7 @@ namespace BuscadorIndiceInvertido.Interfaz
                 return;
             }
 
-            Console.Write("Guardando índice en archivo!");
+            Console.Write("Guardando índice en archivo! ");
 
             if (archivoManager.GuardarIndice(Controller.Instance.ObtenerIndice()))
             {

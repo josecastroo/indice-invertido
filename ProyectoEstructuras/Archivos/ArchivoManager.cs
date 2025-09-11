@@ -18,157 +18,155 @@ namespace BuscadorIndiceInvertido.Persistencia
         }
     }
 
-    internal class ArchivoManager
+        internal class ArchivoManager
+        {
+            private readonly string rutaArchivo;
+
+            public ArchivoManager(string rutaArchivo = "indice.dat")
+            {
+                this.rutaArchivo = rutaArchivo;
+            }
+
+        public bool GuardarIndice(IndiceInvertido indice) {
+    try
     {
-        private readonly string rutaArchivo;
-
-        public ArchivoManager(string rutaArchivo = "indice.dat")
+        using (var stream = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write))
+        using (var writer = new BinaryWriter(stream))
         {
-            this.rutaArchivo = rutaArchivo;
-        }
+            string[] vocabulario = indice.GetVocabulario();
+            int palabrasCount = indice.GetContadorPalabras();
+            
+            var documentosUnicos = new DoubleList<DocumentoUnico>();
+            int docId = 0;
 
-        public bool GuardarIndice(IndiceInvertido indice)
-        {
-            try
+            for (int i = 0; i < palabrasCount; i++)
             {
-                using (FileStream stream = new FileStream(rutaArchivo, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 65536))
-                using (BinaryWriter writer = new BinaryWriter(stream))
+                string palabra = vocabulario[i];
+                var postings = indice.GetPostings(palabra);
+
+                foreach (var (doc, freq) in postings)
                 {
-                    string[] vocabulario = indice.GetVocabulario();
-                    int palabrasCount = indice.GetContadorPalabras();
-
-                    // Recopilar documentos únicos
-                    var documentosUnicos = new DoubleList<DocumentoUnico>();
-                    int docId = 0;
-
-                    for (int i = 0; i < palabrasCount; i++)
+                    if (!ExisteDocumento(documentosUnicos, doc.FileName))
                     {
-                        string palabra = vocabulario[i];
-                        var postings = indice.GetPostings(palabra);
-
-                        foreach (var (doc, freq) in postings)
-                        {
-                            if (!ExisteDocumento(documentosUnicos, doc.FileName))
-                            {
-                                documentosUnicos.Add(new DocumentoUnico(docId++, doc.FileName, doc.tokens));
-                            }
-                        }
-                    }
-                    
-                    writer.Write(documentosUnicos.Count);
-                    foreach (var docUnico in documentosUnicos)
-                    {
-                        writer.Write(docUnico.id);
-                        writer.Write(docUnico.archivo);
-                        writer.Write(docUnico.tokens.Count);
-
-                        foreach (string token in docUnico.tokens)
-                        {
-                            writer.Write(token);
-                        }
-                    }
-                    
-                    writer.Write(palabrasCount);
-                    for (int i = 0; i < palabrasCount; i++)
-                    {
-                        string palabra = vocabulario[i];
-                        writer.Write(palabra);
-                        writer.Write(indice.GetIDF(palabra));
-
-                        var postings = indice.GetPostings(palabra);
-                        writer.Write(postings.Count);
-
-                        foreach (var (doc, freq) in postings)
-                        {
-                            int docIdRef = BuscarIdDocumento(documentosUnicos, doc.FileName);
-                            writer.Write(docIdRef);
-                            writer.Write(freq);
-                        }
+                        documentosUnicos.Add(new DocumentoUnico(docId++, doc.FileName, doc.tokens));
                     }
                 }
-
-                return true;
             }
-            catch (Exception ex)
+            
+            writer.Write(documentosUnicos.Count);
+            foreach (var docUnico in documentosUnicos)
             {
-                Console.WriteLine($"Error al guardar el índice: {ex.Message}");
-                return false;
+                writer.Write(docUnico.id);
+                writer.Write(docUnico.archivo);
+                writer.Write(docUnico.tokens.Count);
+
+                foreach (string token in docUnico.tokens)
+                {
+                    writer.Write(token);
+                }
+            }
+            
+            writer.Write(palabrasCount);
+            for (int i = 0; i < palabrasCount; i++)
+            {
+                string palabra = vocabulario[i];
+                writer.Write(palabra);
+                writer.Write(indice.GetIDF(palabra));
+
+                var postings = indice.GetPostings(palabra);
+                writer.Write(postings.Count);
+
+                foreach (var (doc, freq) in postings)
+                {
+                    int docIdRef = BuscarIdDocumento(documentosUnicos, doc.FileName);
+                    writer.Write(docIdRef);
+                    writer.Write(freq);
+                }
             }
         }
 
-        public IndiceInvertido CargarIndice()
+        return true;
+    }
+    catch (Exception ex) {
+        Console.WriteLine($"Error al guardar el índice: {ex.Message}");
+        return false;
+    }
+        }
+
+    public IndiceInvertido CargarIndice()
+    {
+        try
         {
-            try
+            if (!File.Exists(rutaArchivo))
             {
-                if (!File.Exists(rutaArchivo))
-                {
-                    Console.WriteLine("El archivo de índice no existe.");
-                    return null;
-                }
-
-                using (var reader = new BinaryReader(File.OpenRead(rutaArchivo)))
-                {
-                    int contadorDocu = reader.ReadInt32();
-                    var documentosById = new DocumentoUnico[contadorDocu];
-
-                    for (int i = 0; i < contadorDocu; i++)
-                    {
-                        int docId = reader.ReadInt32();
-                        string fileName = reader.ReadString();
-                        int tokensCount = reader.ReadInt32();
-
-                        var tokens = new DoubleList<string>();
-                        for (int j = 0; j < tokensCount; j++)
-                        {
-                            tokens.Add(reader.ReadString());
-                        }
-
-                        documentosById[docId] = new DocumentoUnico(docId, fileName, tokens);
-                    }
-                    
-                    int palabrasCount = reader.ReadInt32();
-
-                    if (palabrasCount == 0)
-                    {
-                        return new IndiceInvertido();
-                    }
-                    
-                    string[] vocabulario = new string[palabrasCount];
-                    double[] idfValues = new double[palabrasCount];
-                    DoubleList<(Doc doc, int freq)>[] matrizPostings = new DoubleList<(Doc doc, int freq)>[palabrasCount];
-
-                    for (int i = 0; i < palabrasCount; i++)
-                    {
-                        vocabulario[i] = reader.ReadString();
-                        idfValues[i] = reader.ReadDouble();
-
-                        int postingsCount = reader.ReadInt32();
-                        matrizPostings[i] = new DoubleList<(Doc doc, int freq)>();
-
-                        for (int j = 0; j < postingsCount; j++)
-                        {
-                            int docIdRef = reader.ReadInt32();
-                            int freq = reader.ReadInt32();
-                            
-                            DocumentoUnico docUnico = documentosById[docIdRef];
-                            Doc doc = new Doc(docUnico.archivo, docUnico.tokens);
-                            
-                            matrizPostings[i].Add((doc, freq));
-                        }
-                    }
-                    
-                    var indice = new IndiceInvertido();
-                    indice.RestaurarDesdeArchivo(vocabulario, idfValues, matrizPostings);
-
-                    return indice;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al cargar el índice: {ex.Message}");
+                Console.WriteLine("El archivo de índice no existe.");
                 return null;
             }
+
+            using (var stream = new FileStream(rutaArchivo, FileMode.Open, FileAccess.Read))
+            using (var reader = new BinaryReader(stream))
+            {
+                int contadorDocu = reader.ReadInt32();
+                var documentosById = new DocumentoUnico[contadorDocu];
+
+                for (int i = 0; i < contadorDocu; i++)
+                {
+                    int docId = reader.ReadInt32();
+                    string fileName = reader.ReadString();
+                    int tokensCount = reader.ReadInt32();
+
+                    var tokens = new DoubleList<string>();
+                    for (int j = 0; j < tokensCount; j++)
+                    {
+                        tokens.Add(reader.ReadString());
+                    }
+
+                    documentosById[docId] = new DocumentoUnico(docId, fileName, tokens);
+                }
+
+                int palabrasCount = reader.ReadInt32();
+
+                if (palabrasCount == 0)
+                {
+                    return new IndiceInvertido();
+                }
+
+                string[] vocabulario = new string[palabrasCount];
+                double[] idfValues = new double[palabrasCount];
+                DoubleList<(Doc doc, int freq)>[] matrizPostings = new DoubleList<(Doc doc, int freq)>[palabrasCount];
+
+                for (int i = 0; i < palabrasCount; i++)
+                {
+                    vocabulario[i] = reader.ReadString();
+                    idfValues[i] = reader.ReadDouble();
+
+                    int postingsCount = reader.ReadInt32();
+                    matrizPostings[i] = new DoubleList<(Doc doc, int freq)>();
+
+                    for (int j = 0; j < postingsCount; j++)
+                    {
+                        int docIdRef = reader.ReadInt32();
+                        int freq = reader.ReadInt32();
+
+                        DocumentoUnico docUnico = documentosById[docIdRef];
+                        Doc doc = new Doc(docUnico.archivo, docUnico.tokens);
+
+                        matrizPostings[i].Add((doc, freq));
+                    }
+                }
+
+                var indice = new IndiceInvertido();
+                indice.RestaurarDesdeArchivo(vocabulario, idfValues, matrizPostings);
+
+                return indice;
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar el índice: {ex.Message}");
+            return null;
+        }
+    }
 
         public bool ActualizarIndice(IndiceInvertido indiceExistente, DoubleList<Doc> nuevosDocumentos, double percentil = 0.0)
         {

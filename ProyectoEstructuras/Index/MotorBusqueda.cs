@@ -46,7 +46,7 @@ namespace BuscadorIndiceInvertido.Index
         {
             while (true)
             {
-                Console.WriteLine("Ingrese la consulta ('salir' para terminar):");
+                Console.WriteLine("Ingrese la consulta (o escriba 'salir' para finalizar):");
                 Console.Write("> ");
 
                 string query = Console.ReadLine()?.ToLower().Trim();

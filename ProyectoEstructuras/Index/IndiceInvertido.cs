@@ -57,8 +57,7 @@ namespace BuscadorIndiceInvertido.Index
         {
             int totalDocs = arr.Length;
             int[,] tempFrecs = new int[contadorPalabaras, totalDocs];
-        
-            Console.WriteLine($"contadorPalabaras={contadorPalabaras}, totalDocs={totalDocs}");
+            
         // contar frecuencias
         for (int docIndex = 0; docIndex < totalDocs; docIndex++)
             {
