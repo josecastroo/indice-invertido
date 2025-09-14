@@ -30,7 +30,7 @@ namespace BuscadorIndiceInvertido.ContoladorView
 
         public bool Iniciar()
         {
-            string rutaDocumentos = @"C:\Users\bryan\RiderProjects\indice-invertido\Documentos";
+            string rutaDocumentos = @"../Documentos";
 
             try
             {

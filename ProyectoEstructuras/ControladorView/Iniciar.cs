@@ -113,7 +113,7 @@ namespace BuscadorIndiceInvertido.Interfaz
             while (true)
             {
                 Console.WriteLine();
-                Console.Write("Ingrese el percentil de palabras a eliminar (rango 0,00 - 0,10): ");
+                Console.Write("Ingrese el percentil de palabras a eliminar (rango 0.00 - 0.10): ");
                 string input = Console.ReadLine();
 
                 if (double.TryParse(input, out percentil) && percentil >= 0.0 && percentil <= 0.1)
